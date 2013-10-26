@@ -1,0 +1,19 @@
+.\" Manpage for ls4mkbom.
+.\" Contact bomutils@gmail.com
+.TH man 1 "28 July 2013" "1.0" "ls4mkbom man page"
+.SH NAME
+ls4mkbom \- print the contents of a directory in the format expected by mkbom's '-i' option
+.SH SYNOPSIS
+ls4mkbom source-directory
+.SH DESCRIPTION
+.PP
+ls4mkbom prints a list of file and folders contained in the directory specified by 'source-directory'. This file can then be used as an input for mkbom's '-i' option. This is useful, so that user/group ids can be modified to be appropriate for Mac OS X.
+.SH SEE ALSO
+mkbom(1), lsbom(1), dumpbom(1)
+.SH BUGS
+Symbolic links are not supported
+.PP
+Long paths and some characters in filenames will cause ls4mkbom to fail on Windows.
+.SH AUTHOR
+Fabian Renn (bomutils@gmail.com)
+http://bomutils.github.io/
