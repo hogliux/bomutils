@@ -137,8 +137,6 @@ void error(const char *msg) {
 
 
 int main(int argc, char *argv[]) {
-  cerr << "bomutils - 5 days of work from me. 1 minute and $2 from you? :-) Donate at http://bomutils.github.io/" << endl << endl;
-
   bool suppressDirSimModes = false;
   bool suppressDevSize = false;
   bool pathsOnly = false;

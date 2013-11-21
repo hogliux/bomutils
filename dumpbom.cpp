@@ -58,8 +58,6 @@ void print_tree( BOMTree * tree, char * buffer, BOMBlockTable * block_table ) {
 }
 
 int main ( int argc, char * argv[] ) {
-  cerr << "bomutils - 5 days of work from me. 1 minute and $2 from you? :-) Donate at http://bomutils.github.io/" << endl << endl;
-
   if ( argc != 2 ) {
     cerr << "Usage: dumpbom bomfile" << endl;
     return 1;
