@@ -32,14 +32,12 @@ Joseph Coffland and Julian Devlin for initial contributions
 Contact
 -------
 
-Fabian Renn, bomutils@gmail.com
+Fabian Renn, fabian.renn@gmail.com
 
 Donations
 ---------
 
-Creating and maintaining bomutils is time-consuming. If you find bomutils useful, then why not consider donating at http://bomutils.github.io/
+Creating and maintaining bomutils is time-consuming. If you find bomutils useful, then why not consider donating:
 
-
-
-
-
+Bitcoin: 1AUYAR1uzs8c3RnpEHM8kqQYN8eXaxdLKi
+PayPal: fabian.renn@gmail.com

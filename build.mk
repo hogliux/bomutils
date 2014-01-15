@@ -1,7 +1,7 @@
 #
 #  build.mk - Makefile
 #
-#  Copyright (C) 2013 Fabian Renn - bomutils (at) gmail.com
+#  Copyright (C) 2013 Fabian Renn - fabian.renn (at) gmail.com
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,14 +26,16 @@ LS4MKBOM=ls4mkbom$(SUFFIX)
 all : $(MKBOM) $(DUMPBOM) $(LSBOM) $(LS4MKBOM)
 
 install : all
-	cp $(MKBOM) $(BIN_DIR)/
-	cp $(DUMPBOM) $(BIN_DIR)/
-	cp $(LSBOM) $(BIN_DIR)/
-	cp $(LS4MKBOM) $(BIN_DIR)/
-	cp mkbom.1 $(MAN_DIR)/man1/
-	cp dumpbom.1 $(MAN_DIR)/man1/
-	cp lsbom.1 $(MAN_DIR)/man1/
-	cp ls4mkbom.1 $(MAN_DIR)/man1/
+	mkdir -p $(DESTDIR)$(BIN_DIR)
+	mkdir -p $(DESTDIR)$(MAN_DIR)/man1
+	cp $(MKBOM) $(DESTDIR)$(BIN_DIR)/
+	cp $(DUMPBOM) $(DESTDIR)$(BIN_DIR)/
+	cp $(LSBOM) $(DESTDIR)$(BIN_DIR)/
+	cp $(LS4MKBOM) $(DESTDIR)$(BIN_DIR)/
+	cp mkbom.1 $(DESTDIR)$(MAN_DIR)/man1/
+	cp dumpbom.1 $(DESTDIR)$(MAN_DIR)/man1/
+	cp lsbom.1 $(DESTDIR)$(MAN_DIR)/man1/
+	cp ls4mkbom.1 $(DESTDIR)$(MAN_DIR)/man1/
 
 $(MKBOM) : mkbom.o printnode.o crc32.o
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)

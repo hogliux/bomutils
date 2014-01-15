@@ -1,7 +1,7 @@
 /*
   mkbom.cpp - create bill-of-materials file for Mac OS X installers
 
-  Copyright (C) 2013 Fabian Renn - bomutils (at) gmail.com
+  Copyright (C) 2013 Fabian Renn - fabian.renn (at) gmail.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

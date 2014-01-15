@@ -1,7 +1,7 @@
 /*
   ls4mkbom.cpp - generate file/directory list to be used by mkbom's -i option
 
-  Copyright (C) 2013 Fabian Renn - bomutils (at) gmail.com
+  Copyright (C) 2013 Fabian Renn - fabian.renn (at) gmail.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
