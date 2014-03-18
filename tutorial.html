@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Bomutils - Tutorial</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <p><a href="index.html">[Home]</a></p>
+    <h1>Tutorial</h1>
+    <em>Step-by-step guide on how to create a Mac OS X flat installer package on linux/unix</em>
+    <p>Let us assume that we are an employee of a company named <em>ProFarms Ltd.</em> that has created a Mac OS X application called <em>SimCow 1.3</em>. We would like to deploy our product in a Mac OS X installer package.</p>
+    <p><div align="center"><img src="cow.png"/><em><br/>Fig. 1: The pride of the ProFarms Ltd. company: SimCow 1.3</em></div></p>
+    <p>First of all, let us create a build folder in which we will do all the work and store all the preliminary files:</p>
+    <pre>
+      <font color="#509050">~ $</font> mkdir build && cd build
+    </pre>
+    <p>A flat package is basically a xar archive that has a particular structure. In our case the structure of the flat package would look something like this:</p>
+    <p><div align="center"><img src="flat_structure.png"/><em><br/>Fig. 2: The structure of a flat package installer</em></div></p>
+    <p>Let us mimic this folder structure by creating some directories in the build folder:</p>
+    <pre>
+      <font color="#509050">~ $</font> mkdir -p flat/base.pkg flat/Resources/en.lproj
+    </pre>
+    <p>Also, in the build folder, we need to put the pay-load that we wish to install (in our case the SimCow application bundle) into a folder called <em>root</em>. The contents of this folder should be relative to the root file system on Mac OS X, i.e. the root folder contains the <em>Applications</em> folder with the <em>SimCow.app</em> inside. For example, if our <em>SimCow.app</em> is located in our home directory, we would execute the following in the build directory:</p>
+    <pre>
+      <font color="#509050">~ $</font> mkdir -p root/Applications; cp -r &quot;~/SimCow 1.3.app&quot; root/Applications/
+    </pre>
+    After all these commands, the folder structure should look something like this:
+    <p><div align="center"><img src="folder_structure.png"/><em><br/>Fig. 3: Folder structure with payload</em></div></p>
+    <p>Now let's add some of the necessary files in the base package. First we will compress the pay-load:</p>
+    <pre>
+      <font color="#509050">~ $</font> ( cd root &amp;&amp; find . | cpio -o --format odc --owner 0:80 | gzip -c ) &gt; flat/base.pkg/Payload
+    </pre>
+    <p>Notice that we told <em>cpio</em> to override the user and group id. This is very important as your linux user and group ids will most certainly not match with the required user and group <em>root/wheel</em> (0/80) which Mac OS X requires.</p>
+<p>Now let us create the <em>PackageInfo</em> file in the base.pkg directory. This is an xml-file containing properties about the installer:</p>
+    <p>
+    <pre>
+      <br/>&lt;pkg-info format-version=&quot;2&quot; identifier=&quot;com.ProFarms.SimCow.base.pkg&quot; version=&quot;1.3.0&quot; install-location=&quot;/&quot; auth=&quot;root&quot;&gt;<br/>  &lt;payload installKBytes=&quot;264&quot; numberOfFiles=&quot;13&quot;/&gt;<br/>  &lt;scripts&gt;<br/>    &lt;postinstall file=&quot;./postinstall&quot;/&gt;<br/>  &lt;/scripts&gt;<br/>&lt;bundle-version&gt;<br/>    &lt;bundle id=&quot;com.ProFarms.SimCow&quot; CFBundleIdentifier=&quot;com.ProFarms.SimCow&quot; path=&quot;./Applications/SimCow 1.3.app&quot; CFBundleVersion=&quot;1.3.0&quot;/&gt;<br/>&lt;/bundle-version&gt;<br/>&lt;/pkg-info&gt;
+    </pre>
+    <p>There are many important things you must watch out for in this file. First of all, notice how the PackageInfo file lists all bundles that are in your pay load. The version and bundle-ids must match the <em>Info.plist</em> in your application bundle exactly, otherwise the installer will fail. Also, the PackageInfo contains the number of files and the installation size in kb. Both can be obtained by executing the following in the build folder:
+    <pre>
+      <font color="#509050">~ $</font> find root | wc -l
+      <font color="#509050">~ $</font> du -b -s root
+    </pre>
+    <p>where the latter is the payload size in <em>bytes</em>.</p>
+    <p>If you do not wish to execute an installer script then you can omit the <em>&lt;scripts&gt;</em> section of the above PackageInfo file. However, ProFarms Ltd. has decided to deploy their installer with a postinstall script. To add this to the installer, we first create a script directory (<em>mkdir scripts</em>) in the build folder and then place a file named <em>postinstall</em> inside that folder with the following contents:</p>
+    <pre>
+      #!/bin/bash<br/><br/>
+      osascript -e &#39;tell app &#34;Finder&#34; to display dialog &#34;To get the most of SimCow please also install SimMilkMachine.&quot;&#39;
+    </pre>
+    <p>Mark the script as executable</p>
+    <pre><font color="#509050">~ $</font> chmod +x scripts/postinstall</pre>
+    <p>and compress the scripts folder with the following command:</p>
+    <pre>
+      <font color="#509050">~ $</font> ( cd scripts &amp;&amp; find . | cpio -o --format odc --owner 0:80 | gzip -c ) &gt; flat/base.pkg/Scripts
+    </pre>
+    <p>The last file needed in the base package is the <em>Bom</em> file. For this you will need to install the <a href="http://hogliux.github.io/bomutils">bomutils</a>. First, create a bom-compatible file listing of the payload:</p>
+    <pre>
+      <font color="#509050">~ $</font> ls4mkbom root > filelist.txt
+    </pre>
+<p>If you look at the contents of <em>filelist.txt</em> you will notice that the user and group ids are not correct. For example, on my linux installation, my user and group id is 1000/1002 - <em>this will be different on your system</em>. However, as mentioned above, on Mac OS X the user and group id must be 0/80. We can conveniently replace the gorup/user ids with <em>sed</em>:</p>
+    <pre>
+      <font color="#509050">~ $</font> cat filelist.txt | sed 's/1000\/1002/0\/80/g' > filelist_osx_permission.txt
+    </pre>
+<p>Now we are ready to create the <em>Bom</em> file:</p>
+    <pre>
+      <font color="#509050">~ $</font> mkbom -i filelist_osx_permission.txt flat/base.pkg/Bom
+    </pre>
+    <p>Great! We are done with the base.pkg, however there are still a few more files left in the flat package directory - all are very straight-forward.</p>
+<p> First, create the <em>Distribution</em> file. Place the following contents into the <em>flat</em> folder:</p>
+    <pre>
+      &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;<br/>&lt;installer-script minSpecVersion=&quot;1.000000&quot; authoringTool=&quot;com.apple.PackageMaker&quot; authoringToolVersion=&quot;3.0.3&quot; authoringToolBuild=&quot;174&quot;&gt;<br/>    &lt;title&gt;SimCow 1.3&lt;/title&gt;<br/>    &lt;options customize=&quot;never&quot; allow-external-scripts=&quot;no&quot;/&gt;<br/>    &lt;domains enable_anywhere=&quot;true&quot;/&gt;<br/>    &lt;installation-check script=&quot;pm_install_check();&quot;/&gt;<br/>    &lt;script&gt;function pm_install_check() {<br/>  if(!(system.version.ProductVersion &gt;= '10.5')) {<br/>    my.result.title = 'Failure';<br/>    my.result.message = 'You need at least Mac OS X 10.5 to install SimCow.';<br/>    my.result.type = 'Fatal';<br/>    return false;<br/>  }<br/>  return true;<br/>}<br/>&lt;/script&gt;<br/>    &lt;choices-outline&gt;<br/>        &lt;line choice=&quot;choice1&quot;/&gt;<br/>    &lt;/choices-outline&gt;<br/>    &lt;choice id=&quot;choice1&quot; title=&quot;base&quot;&gt;<br/>        &lt;pkg-ref id=&quot;com.ProFarms.SimCow.base.pkg&quot;/&gt;<br/>    &lt;/choice&gt;<br/>    &lt;pkg-ref id=&quot;com.ProFarms.SimCow.base.pkg&quot; installKBytes=&quot;264&quot; version=&quot;1.3.0&quot; auth=&quot;Root&quot;&gt;#base.pkg&lt;/pkg-ref&gt;<br/>&lt;/installer-script&gt;
+    </pre>
+    <p>Most of the items should not need a lot of explaining. We've included a system version check in the Distribution javascript. Note also, that the pkg-ref id and the installKBytes must match the PackageInfo file which we generated above. </p>
+    <p><em>Optional: </em>If you would like to add a license text, a ReadMe file, a welcome text and an installer background image. Then also add the following to your Distribution file, right after the closing <em>&lt;/script&gt;</em> tag:</p>
+    <pre>
+      <font color="#909090">...
+      &lt;/script&gt;</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;background&nbsp;file=&quot;background&quot;&nbsp;alignment=&quot;left&quot;&nbsp;scaling=&quot;none&quot;/&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;welcome&nbsp;file=&quot;Welcome&quot;/&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;readme&nbsp;file=&quot;ReadMe&quot;/&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;license&nbsp;file=&quot;License&quot;/&gt;
+<font color="#909090">    &lt;choices-outline&gt;<br/>        &lt;line choice=&quot;choice1&quot;/&gt;<br/>...</font>
+    </pre>    
+    <p>You will also need to create the License, Welcome, ReadMe and background files in the <em>flat/Resources/en.lproj</em> folder. The text files need to be in <em>.rtf</em> format (for example use <a href="http://www.abisource.com/">AbiWord</a>). The background image file is a <em>.png</em> file.</p>
+    <p>Now the only thing that needs to be done is to zip everything up into a xar archive. Normally, <em>xar</em> does not come pre-installed in linux distributions. It can either be installed with your distro's package manager or obtained from <a href="http://code.google.com/p/xar/">here</a>. Now type-in the following command to create your flat package installer:</p>
+    <pre>
+      <font color="#509050">~ $</font> ( cd flat && xar --compression none -cf &quot;../SimCow 1.3 Installer.pkg&quot; * )
+    </pre>
+    <p>Note, that you must <em>not compress</em> the flat package installer. The PayLoad has already been compressed and compressing the flat package again will create a broken installer.</p>
+<p>That's it. You now have a Mac OS X installer package!</p>
+<p><em>Optional:</em> Some people like to put the installer onto a disk image. This can also be done within linux with the following command:</p>
+<pre>
+  <font color="#509050">~ $ </font> mkdir /tmp/disk
+  <font color="#509050">~ $ </font> cp &quot;SimCow 1.3 Installer.pkg&quot; /tmp/disk/
+  <font color="#509050">~ $ </font> mkisofs -o SimCow.img  -r -l -ldots -V &quot;Sim Cow 1.3&quot; /tmp/disk
+</pre>
+<script src="javascripts/scale.fix.js"></script>
+<script type="text/javascript">
+  var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+  document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-42787145-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+<p><a href="index.html">[Home]</a></p>
+<p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+  </body>
+</html>
