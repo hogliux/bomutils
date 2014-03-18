@@ -23,7 +23,7 @@ To create a bom file from unix type OSes, follow the following steps.
 
 4. Use mkbom to create the bom file by invoking 'mkbom -i filelist.txt Bom'
 
-For full documentation it is best to consult the man pages or to follow the tutorial on http://bomutils.github.io/ 
+For full documentation it is best to consult the man pages or to follow the tutorial on http://hogliux.github.io/github
 
 Acknowledgments
 ----------------

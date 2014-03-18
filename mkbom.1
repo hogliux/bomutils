@@ -7,7 +7,7 @@ mkbom \- create a bill-of-materials file
 mkbom [-i] source target-bom-file
 .SH DESCRIPTION
 .PP
-mkbom creates a bill-of-materials file specified by 'target-bom-file' from the contents of the directory specified with 'source'. This bill-of-materials file can be used to create Mac OS X installer packages. Alternatively, by specifying the '-i' option, mkbom can create a bill-of-materials file from a text file specified by source, which lists the contents of a directory in the same format as the output from 'lsbom' and 'ls4mkbom'.
+mkbom creates a bill-of-materials file specified by 'target-bom-file' from the contents of the directory specified with 'source'. This bill-of-materials file can be used to create Mac OS X installer packages. Alternatively, by specifying the '-i' option, mkbom can create a bill-of-materials file from a text file specified by source, which lists the contents of a directory in the same format as the output from 'lsbom' and 'ls4mkbom'. See the tutorial at http://hogliux.github.io/bomutils/tutorial.html
 .TP
 \fB\-i\fR
 create a bill-of-materials file from the text file specified with 'source' which contains a list of files in the same format as the output from 'lsbom' and 'ls4mkbom'. This option is highly recommended when using mkbom on foreign OSes (linux, windows, ...) because it allows the user to modify user and group ids of a directory listing before processing with mkbom.
@@ -19,4 +19,4 @@ Symbolic links are not supported
 Long paths and some characters in filenames will cause mkbom to fail on Windows.
 .SH AUTHOR
 Fabian Renn (fabian.renn@gmail.com)
-http://github.com/hogliux/bomutils
+http://hogliux.github.io/bomutils
