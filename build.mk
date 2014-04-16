@@ -18,59 +18,39 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
 OPTFLAGS=-O2 -g0 -s
 
-MKBOM=mkbom$(SUFFIX)
-DUMPBOM=dumpbom$(SUFFIX)
-LSBOM=lsbom$(SUFFIX)
-LS4MKBOM=ls4mkbom$(SUFFIX)
+APP_SOURCES=\
+	mkbom.cpp \
+	dumpbom.cpp \
+	lsbom.cpp \
+	ls4mkbom.cpp
 
-all : $(MKBOM) $(DUMPBOM) $(LSBOM) $(LS4MKBOM)
+COMMON_SOURCES=\
+	printnode.cpp \
+	crc32.cpp
+
+APPS=$(addsuffix $(SUFFIX),$(APP_SOURCES:.cpp=))
+
+all : $(APPS)
 
 install : all
 	mkdir -p $(DESTDIR)$(BIN_DIR)
 	mkdir -p $(DESTDIR)$(MAN_DIR)/man1
-	cp $(MKBOM) $(DESTDIR)$(BIN_DIR)/
-	cp $(DUMPBOM) $(DESTDIR)$(BIN_DIR)/
-	cp $(LSBOM) $(DESTDIR)$(BIN_DIR)/
-	cp $(LS4MKBOM) $(DESTDIR)$(BIN_DIR)/
-	cp mkbom.1 $(DESTDIR)$(MAN_DIR)/man1/
-	cp dumpbom.1 $(DESTDIR)$(MAN_DIR)/man1/
-	cp lsbom.1 $(DESTDIR)$(MAN_DIR)/man1/
-	cp ls4mkbom.1 $(DESTDIR)$(MAN_DIR)/man1/
+	cp $(APPS) $(DESTDIR)$(BIN_DIR)/
+	cp *.1 $(DESTDIR)$(MAN_DIR)/man1/
 
-$(MKBOM) : mkbom.o printnode.o crc32.o
+%.o : %.cpp
+	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
+
+%.d : %.cpp
+	@set -e; rm -f $@; $(CXX) -MM $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $< > $@.$$$$; \
+	sed -e 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; rm -f $@.$$$$
+
+%$(SUFFIX) : %.o $(COMMON_SOURCES:.cpp=.o)
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
 
-$(DUMPBOM) : dumpbom.o 
-	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
-
-$(LSBOM) : lsbom.o 
-	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
-
-$(LS4MKBOM) : ls4mkbom.o printnode.o printnode.o crc32.o
-	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
-
-mkbom.o : mkbom.cpp bom.h printnode.hpp
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
-
-printnode.o : printnode.cpp printnode.hpp crc32.hpp
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
-
-crc32.o : crc32.cpp crc32.hpp crc32_poly.hpp
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
-
-dumpbom.o : dumpbom.cpp bom.h
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
-
-lsbom.o : lsbom.cpp bom.h
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
-
-ls4mkbom.o : ls4mkbom.cpp printnode.hpp
-	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
+-include $(APP_SOURCES:.cpp=.d) $(COMMON_SOURCES:.cpp=.d)
 
 clean :
-	rm -f *.o
-	rm -f $(MKBOM)
-	rm -f $(DUMPBOM)
-	rm -f $(LSBOM)
-	rm -f $(LS4MKBOM)
+	rm -f *.o *.d
+	rm -f $(APPS)
 
