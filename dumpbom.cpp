@@ -33,6 +33,30 @@
 
 using namespace std;
 
+void print_paths(BOMPaths *paths, char * buffer, BOMBlockTable * block_table) {
+  paths->isLeaf = ntohs(paths->isLeaf);
+  paths->count = ntohs(paths->count);
+  paths->forward = ntohl(paths->forward);
+  paths->backward = ntohl(paths->backward);
+  cout << endl;
+  cout << "paths->isLeaf = " << paths->isLeaf << endl;
+  cout << "paths->count = " << paths->count << endl;
+  cout << "paths->forward = " << paths->forward << endl;
+  cout << "paths->backward = " << paths->backward << endl;
+
+  if (paths->isLeaf == htons(0)) {
+    BOMPointer & child_ptr = block_table->blockPointers[ntohl(paths->indices[0].index0)];
+    BOMPaths * child_paths = (BOMPaths*) &buffer[child_ptr.address];
+    print_paths(child_paths, buffer, block_table);
+  }
+
+  if (paths->forward) {
+    BOMPointer & sibling_ptr = block_table->blockPointers[paths->forward];
+    BOMPaths * sibling_paths = (BOMPaths*) &buffer[sibling_ptr.address];
+    print_paths(sibling_paths, buffer, block_table);
+  }
+}
+
 void print_tree( BOMTree * tree, char * buffer, BOMBlockTable * block_table ) {
   tree->version = ntohl( tree->version );
   tree->child = ntohl( tree->child );
@@ -47,14 +71,7 @@ void print_tree( BOMTree * tree, char * buffer, BOMBlockTable * block_table ) {
   cout << "tree->unknown3 = " << (int)tree->unknown3 << endl;
   BOMPointer & child_ptr = block_table->blockPointers[tree->child];
   BOMPaths * paths = (BOMPaths*)&buffer[child_ptr.address];
-  paths->isLeaf = ntohs( paths->isLeaf );
-  paths->count = ntohs( paths->count );
-  paths->forward = ntohs( paths->forward );
-  paths->backward = ntohs( paths->backward );
-  cout << "paths->isLeaf = " << paths->isLeaf << endl;
-  cout << "paths->count = " << paths->count << endl;
-  cout << "paths->forward = " << paths->forward << endl;
-  cout << "paths->backward = " << paths->backward << endl;
+  print_paths(paths, buffer, block_table);
 }
 
 int main ( int argc, char * argv[] ) {
@@ -214,10 +231,10 @@ int main ( int argc, char * argv[] ) {
       cout << "info->numberOfPaths = " << info->numberOfPaths << endl;
       cout << "info->numberOfInfoEntries = " << info->numberOfInfoEntries << endl;
       for ( unsigned int i=0; i<info->numberOfInfoEntries; ++i ) {
-	cout << "info->entries[i].unknown0 = " << info->entries[i].unknown0 << endl;
-	cout << "info->entries[i].unknown1 = " << info->entries[i].unknown1 << endl;
-	cout << "info->entries[i].unknown2 = " << info->entries[i].unknown2 << endl;
-	cout << "info->entries[i].unknown3 = " << info->entries[i].unknown3 << endl;
+        cout << "info->entries[" << i << "].unknown0 = " << info->entries[i].unknown0 << endl;
+        cout << "info->entries[" << i << "].unknown1 = " << info->entries[i].unknown1 << endl;
+        cout << "info->entries[" << i << "].unknown2 = " << info->entries[i].unknown2 << endl;
+        cout << "info->entries[" << i << "].unknown3 = " << info->entries[i].unknown3 << endl;
       }
     } else if ( name == "VIndex" ) {
       BOMVIndex * vindex = (BOMVIndex*)&buffer[ptr.address];
@@ -229,6 +246,7 @@ int main ( int argc, char * argv[] ) {
       cout << "vindex->indexToVTree = " << vindex->indexToVTree << endl;
       cout << "vindex->unknown2 = " << vindex->unknown2 << endl;
       cout << "vindex->unknown3 = " << (int)vindex->unknown3 << endl;
+      cout << endl;
       BOMPointer & v_ptr = block_table->blockPointers[vindex->indexToVTree];
       BOMTree * tree = (BOMTree*)&buffer[v_ptr.address];
       print_tree( tree, buffer, block_table );
