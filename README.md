@@ -30,6 +30,7 @@ For full documentation it is best to follow the tutorial at http://hogliux.githu
 Acknowledgments
 ----------------
 Joseph Coffland and Julian Devlin for initial contributions
+Baron Roberts for numerous improvements (symlink support, code clean-up, ...)
 
 Contact
 -------

@@ -18,6 +18,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
 
   Initial work done by Joseph Coffland. Further contributions by Julian Devlin.
+  Numerous further improvements by Baron Roberts.
 */
 #pragma once
 #include <stdint.h>

@@ -17,7 +17,8 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
 
-  Initial work done by Joseph Coffland. Further contributions by Julian Devlin.
+  Initial work done by Joseph Coffland and Julian Devlin.
+  Numerous further improvements by Baron Roberts.
 */
 #include "bom.h"
 
