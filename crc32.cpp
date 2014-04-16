@@ -25,10 +25,12 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 #include <iostream>
 
+#include "crc32.hpp"
 #include "crc32_poly.hpp"
 
 using namespace std;
@@ -132,4 +134,20 @@ uint32_t calc_crc32( const char * file_path ) {
 #endif
   /* invert all bits */
   return crc ^ 0xffffffff;
+}
+
+uint32_t calc_str_crc32(const char * str) {
+    size_t num_bytes = strlen(str);
+    uint32_t crc = 0;
+    for (size_t i = 0; i < num_bytes; ++i) {
+        crc = crc_table[str[i] ^ ((crc >> 24) & 0xFF)] ^ (crc << 8);
+    }
+
+    /* cksum.c also calculates the crc-32 on the length of the file */
+    while (num_bytes > 0) {
+        crc = crc_table[(((uint64_t) num_bytes) & 0xFF) ^ ((crc >> 24) & 0xFF)] ^ (crc << 8);
+        num_bytes >>= 8;
+    }
+
+    return crc ^ 0xffffffff;
 }

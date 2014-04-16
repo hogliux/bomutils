@@ -45,7 +45,7 @@ void print_node( ostream & output, const string & base, const string & system_pa
 #else
   fullpath += string( "/" ) + system_path;
 #endif
-  if ( stat( fullpath.c_str(), &s ) != 0 ) {
+  if ( lstat( fullpath.c_str(), &s ) != 0 ) {
     cerr << "Unable to find path: " << fullpath << endl;
     exit(1);
   }
@@ -53,13 +53,15 @@ void print_node( ostream & output, const string & base, const string & system_pa
   if ( S_ISREG(s.st_mode) ) {
     output << "\t" << s.st_size << "\t" << calc_crc32( fullpath.c_str() );
   }
-  output << endl;
 #if !defined(WINDOWS)
   if ( S_ISLNK( s.st_mode) ) {
-    cerr << endl << "We don't support symbolic links yet: please modify code" << endl;
-    exit(1);
+    char buffer[PATH_MAX];
+    ssize_t num_bytes = readlink(fullpath.c_str(), buffer, PATH_MAX);
+    buffer[num_bytes] = '\0';
+    output << "\t" << s.st_size << "\t" << calc_str_crc32(buffer) << "\t" << buffer;
   }
 #endif
+  output << endl;
   if ( S_ISDIR( s.st_mode ) ) {
     DIR * d = opendir( fullpath.c_str() );
     struct dirent * dir;

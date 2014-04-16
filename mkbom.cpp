@@ -60,7 +60,9 @@ struct Node {
   uint32_t gid;
   uint32_t size;
   uint32_t checksum;
-  Node() 
+  uint32_t linkNameLength;
+  string linkName;
+  Node()
   : type( kNullNode ) {
   }
 };
@@ -216,7 +218,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     while( getline( lsbom_file, line ) ) {
       Node n;
       string name;
-      vector<uint64_t> elements;
+      vector<string> elements;
       {
 	stringstream ss( line );
 	getline( ss, name, '\t' );
@@ -227,27 +229,35 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
 	{
 	  string rest;
 	  getline( ss, rest );
-	  for ( std::size_t it = rest.find( "/" ); it != string::npos; it = rest.find( "/" ) ) {
+    std::size_t it = rest.find("/");
+    if (it != string::npos) {
 	    rest[it] = ' ';
 	  }
-	  stringstream int_stream( rest );
-	  copy( istream_iterator<uint64_t>( int_stream ), istream_iterator<uint64_t>(), back_inserter( elements ) );
+	  stringstream item_stream( rest );
+	  copy( istream_iterator<string>( item_stream ), istream_iterator<string>(), back_inserter( elements ) );
 	}
       }
-      n.mode = dec_octal_to_int( elements[0] );
-      n.uid = elements[1];
-      n.gid = elements[2];
+      n.mode = dec_octal_to_int( atol( elements[0].c_str() ) );
+      n.uid = atol( elements[1].c_str() );
+      n.gid = atol( elements[2].c_str() );
       n.size = 0;
       n.checksum = 0;
+      n.linkNameLength = 0;
       if ( ( n.mode & 0xF000 ) == 0x4000 ) {
-	n.type = kDirectoryNode;
+        n.type = kDirectoryNode;
       } else if ( ( n.mode & 0xF000 ) == 0x8000 ) {
-	n.type = kFileNode;
-	n.size = elements[3];
-	n.checksum = elements[4];
+        n.type = kFileNode;
+        n.size = atol(elements[3].c_str());
+        n.checksum = atol(elements[4].c_str());
+      } else if ((n.mode & 0xF000) == 0xA000) {
+        n.type = kSymbolicLinkNode;
+        n.size = atol(elements[3].c_str());
+        n.checksum = atol(elements[4].c_str());
+        n.linkNameLength = elements[5].size() + 1;
+        n.linkName = elements[5];
       } else {
-	cerr << endl << "Node type not supported" << endl;
-	exit(1);
+        cerr << endl << "Node type not supported" << endl;
+        exit(1);
       }
       all_nodes[name] = n;
     }
@@ -322,33 +332,46 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
       uint32_t parent = stack[0].first;
       stack.erase( stack.begin() );
       for ( map<string,Node>::const_iterator it=arg.children.begin(); it != arg.children.end(); ++it ) {
-	const Node & node = it->second;
-	string s = it->first;
-	BOMPathInfo2 info2;
-	info2.type = ( node.type == kDirectoryNode ) ? TYPE_DIR : TYPE_FILE;
-	info2.unknown0 = 1;
-	info2.architecture = htons(3); /* ?? */
-	info2.mode = htons( node.mode );
-	info2.user = htonl( node.uid );
-	info2.group = htonl( node.gid );
-	info2.modtime = 0;
-	info2.size = htonl( node.size );
-	info2.unknown1 = 1;
-	info2.checksum = htonl( node.checksum );
-	info2.linkNameLength = 0;
-	BOMPathInfo1 info1;
-	info1.id = htonl( j + 1 );
-	info1.index = htonl( bom.addBlock( &info2, sizeof(BOMPathInfo2) ) );
-	paths->indices[j].index0 = htonl( bom.addBlock( &info1, sizeof(BOMPathInfo1) ) );
-	unsigned int bom_file_size = sizeof(uint32_t) + 1 + s.size();
-	BOMFile * f = (BOMFile*)malloc( bom_file_size );
-	f->parent = htonl( parent );
-	strcpy( f->name, s.c_str() );
-	paths->indices[j].index1 = htonl( bom.addBlock( f, bom_file_size ) );
-	free( (void*) f );
+        const Node & node = it->second;
+        string s = it->first;
+        
+        unsigned int bom_path_info2_size = sizeof(BOMPathInfo2) + node.linkNameLength;
+        BOMPathInfo2 * info2 = (BOMPathInfo2*) malloc(bom_path_info2_size);
+        if (node.type == kDirectoryNode) {
+          info2->type = TYPE_DIR;
+        } else if (node.type == kFileNode) {
+          info2->type = TYPE_FILE;
+        } else {
+          info2->type = TYPE_LINK;
+        }
+        info2->unknown0 = 1;
+        info2->architecture = htons(3); /* ?? */
+        info2->mode = htons(node.mode);
+        info2->user = htonl(node.uid);
+        info2->group = htonl(node.gid);
+        info2->modtime = 0;
+        info2->size = htonl(node.size);
+        info2->unknown1 = 1;
+        info2->checksum = htonl(node.checksum);
+        info2->linkNameLength = htonl(node.linkNameLength);
+        strcpy( info2->linkName, node.linkName.c_str() );
 	
-	stack.push_back( std::pair<uint32_t, const Node*>( j + 1, &node ) );      
-	j++;
+        BOMPathInfo1 info1;
+        info1.id = htonl( j + 1 );
+        info1.index = htonl(bom.addBlock(info2, bom_path_info2_size));
+        paths->indices[j].index0 = htonl( bom.addBlock( &info1, sizeof(BOMPathInfo1) ) );
+        
+        free((void*) info2);
+	
+        unsigned int bom_file_size = sizeof(uint32_t) + 1 + s.size();
+        BOMFile * f = (BOMFile*)malloc( bom_file_size );
+        f->parent = htonl( parent );
+        strcpy( f->name, s.c_str() );
+        paths->indices[j].index1 = htonl( bom.addBlock( f, bom_file_size ) );
+        free( (void*) f );
+	
+        stack.push_back( std::pair<uint32_t, const Node*>( j + 1, &node ) );      
+        j++;
       }
     }
     tree.child = htonl( bom.addBlock( paths, path_size ) );
