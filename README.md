@@ -9,7 +9,8 @@ Build Instructions
 ------------------
 1. Copy the appropriate makefile: 'cp Makefile.system Makefile' where 'system' must be replaced with either 'unix' (for linux and unix type systems) or 'win' for Windows
 2. Compile the code by executing: 'make'
-3. Install the tools by executing: 'sudo make install'
+3. Tools are available in the build/bin directory
+4. Install the tools by executing: 'sudo make install'
 
 Usage
 -----
