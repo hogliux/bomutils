@@ -36,10 +36,10 @@ APPS=$(addsuffix $(SUFFIX),$(APP_SOURCES:.cpp=))
 all : $(APPS)
 
 install : all
-	mkdir -p $(DESTDIR)$(BIN_DIR)
-	mkdir -p $(DESTDIR)$(MAN_DIR)/man1
-	cp $(APPS) $(DESTDIR)$(BIN_DIR)/
-	cp *.1 $(DESTDIR)$(MAN_DIR)/man1/
+	install -d $(DESTDIR)$(BIN_DIR)
+	install -d $(DESTDIR)$(MAN_DIR)/man1/
+	install -m 0755 $(APPS) $(DESTDIR)$(BIN_DIR)
+	install -m 0644 *.1 $(DESTDIR)$(MAN_DIR)/man1/
 
 %.o : %.cpp
 	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
