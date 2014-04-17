@@ -45,10 +45,12 @@ void print_node( ostream & output, const string & base, const string & system_pa
   if ( system_path.size() != 0 ) {
     fullpath += string( "\\" ) + system_path;
   }
+  int stat_ret = stat( fullpath.c_str(), &s );
 #else
   fullpath += string( "/" ) + system_path;
+  int stat_ret = lstat( fullpath.c_str(), &s );
 #endif
-  if ( lstat( fullpath.c_str(), &s ) != 0 ) {
+  if ( stat_ret != 0 ) {
     cerr << "Unable to find path: " << fullpath << endl;
     exit(1);
   }
