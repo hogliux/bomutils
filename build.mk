@@ -37,9 +37,9 @@ all : $(APPS)
 
 install : all
 	install -d $(DESTDIR)$(BIN_DIR)
-	install -d $(DESTDIR)$(MAN_DIR)/man1/
+	install -d $(DESTDIR)$(MAN_DIR)/man1
 	install -m 0755 $(APPS) $(DESTDIR)$(BIN_DIR)
-	install -m 0644 *.1 $(DESTDIR)$(MAN_DIR)/man1/
+	install -m 0644 *.1 $(DESTDIR)$(MAN_DIR)/man1
 
 %.o : %.cpp
 	$(CXX) -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
