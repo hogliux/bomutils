@@ -46,7 +46,7 @@ MAN=$(addprefix $(BUILD_MAN_DIR)/,$(APP_SOURCES:.cpp=.1.gz))
 vpath %.cpp src
 vpath %.1 man
 
-.PHONY: $(APP_NAMES) all install clean mkdirs
+.PHONY: $(APP_NAMES) all install clean
 .PRECIOUS: $(BUILD_OBJ_DIR)/%.o $(BUILD_OBJ_DIR)/%.d
 
 all : $(APPS) $(MAN)
@@ -57,26 +57,27 @@ install : all
 	install -m 0755 $(APPS) $(DESTDIR)$(BIN_DIR)
 	install -m 0644 $(MAN) $(DESTDIR)$(MAN_DIR)/man1
 
-$(BUILD_OBJ_DIR)/%.o : %.cpp | mkdirs
+$(BUILD_OBJ_DIR)/%.o : %.cpp
+	@mkdir -p $(BUILD_OBJ_DIR)
 	$(CXX) -o $@ -c $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $<
 
-$(BUILD_OBJ_DIR)/%.d : %.cpp | mkdirs
+$(BUILD_OBJ_DIR)/%.d : %.cpp
+	@mkdir -p $(BUILD_OBJ_DIR)
 	@set -e; rm -f $@; $(CXX) -MM $(OPTFLAGS) $(CXXFLAGS) $(CFLAGS) $< > $@.$$$$; \
 	sed -e 's,\($*\)\.o[ :]*,$(BUILD_OBJ_DIR)/\1.o $@ : ,g' < $@.$$$$ > $@; rm -f $@.$$$$
 
-$(BUILD_BIN_DIR)/%$(SUFFIX) : $(BUILD_OBJ_DIR)/%.o $(COMMON_OBJECTS) | mkdirs
+$(BUILD_BIN_DIR)/%$(SUFFIX) : $(BUILD_OBJ_DIR)/%.o $(COMMON_OBJECTS)
+	@mkdir -p $(BUILD_BIN_DIR)
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LIBS)
 
-$(BUILD_MAN_DIR)/%.1.gz : %.1 | mkdirs
+$(BUILD_MAN_DIR)/%.1.gz : %.1
+	@mkdir -p $(BUILD_MAN_DIR)
 	gzip -c $< > $@
 
 $(APP_NAMES) :
 	$(MAKE) $(BUILD_BIN_DIR)/$@
 
 -include $(DEPS)
-
-mkdirs :
-	@mkdir -p $(BUILD_MAN_DIR) $(BUILD_BIN_DIR) $(BUILD_OBJ_DIR)
 
 clean :
 	rm -rf $(BUILD_DIR)
