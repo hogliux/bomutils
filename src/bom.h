@@ -98,8 +98,8 @@ struct BOMVars {
 
 
 struct BOMPathIndices {
-  uint32_t index0;
-  uint32_t index1;
+  uint32_t index0; /* for leaf: points to BOMPathInfo1, for branch points to BOMPaths */
+  uint32_t index1; /* always points to BOMFile */
 } __attribute__((packed));
 
 
