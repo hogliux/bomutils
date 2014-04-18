@@ -36,27 +36,35 @@
 
 using namespace std;
 
-void print_paths(BOMPaths *paths, char * buffer, BOMBlockTable * block_table) {
+void print_paths(BOMPaths *paths, char * buffer, BOMBlockTable * block_table, unsigned int id ) {
   paths->isLeaf = ntohs(paths->isLeaf);
   paths->count = ntohs(paths->count);
   paths->forward = ntohl(paths->forward);
   paths->backward = ntohl(paths->backward);
   cout << endl;
+  cout << "path id=" << id << endl;
   cout << "paths->isLeaf = " << paths->isLeaf << endl;
   cout << "paths->count = " << paths->count << endl;
   cout << "paths->forward = " << paths->forward << endl;
   cout << "paths->backward = " << paths->backward << endl;
+  for ( unsigned int i=0; i<paths->count; ++i ) {
+    BOMPointer & ptr = block_table->blockPointers[ntohl(paths->indices[i].index1)];
+    BOMFile & file = *((BOMFile*)&buffer[ptr.address]);
+    cout << "path->indices[" << i << "].index0 = " << ntohl(paths->indices[i].index0) << endl;
+    cout << "path->indices[" << i << "].index1.parent = " << ntohl(file.parent) << endl;
+    cout << "path->indices[" << i << "].index1.name = " << file.name << endl;
+  }
 
   if (paths->isLeaf == htons(0)) {
     BOMPointer & child_ptr = block_table->blockPointers[ntohl(paths->indices[0].index0)];
     BOMPaths * child_paths = (BOMPaths*) &buffer[child_ptr.address];
-    print_paths(child_paths, buffer, block_table);
+    print_paths(child_paths, buffer, block_table, ntohl(paths->indices[0].index0));
   }
 
   if (paths->forward) {
     BOMPointer & sibling_ptr = block_table->blockPointers[paths->forward];
     BOMPaths * sibling_paths = (BOMPaths*) &buffer[sibling_ptr.address];
-    print_paths(sibling_paths, buffer, block_table);
+    print_paths(sibling_paths, buffer, block_table, paths->forward);
   }
 }
 
@@ -74,7 +82,7 @@ void print_tree( BOMTree * tree, char * buffer, BOMBlockTable * block_table ) {
   cout << "tree->unknown3 = " << (int)tree->unknown3 << endl;
   BOMPointer & child_ptr = block_table->blockPointers[tree->child];
   BOMPaths * paths = (BOMPaths*)&buffer[child_ptr.address];
-  print_paths(paths, buffer, block_table);
+  print_paths(paths, buffer, block_table, tree->child);
 }
 
 int main ( int argc, char * argv[] ) {
