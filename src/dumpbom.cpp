@@ -7,12 +7,12 @@
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
@@ -82,6 +82,7 @@ int main ( int argc, char * argv[] ) {
     cerr << "Usage: dumpbom bomfile" << endl;
     return 1;
   }
+
   char * buffer;
   streampos file_length;
   {
@@ -190,14 +191,14 @@ int main ( int argc, char * argv[] ) {
       total_length += var->length + 1;
       var = (BOMVar*)&buffer[header->varsOffset+total_length];
     }
-    
+
     cout << "vars->count = " << vars->count << endl;
     cout << "( calculated length = " << total_length << ")" << endl;
     var = &vars->first[0];
     total_length = sizeof(uint32_t);
     for ( int i=0; i<var_count; ++i ) {
       if ( i != 0 ) {
-	cout << ",";
+        cout << ",";
       }
       total_length += sizeof(uint32_t);
       total_length += var->length + 1;
@@ -225,10 +226,10 @@ int main ( int argc, char * argv[] ) {
       info->numberOfPaths = ntohl( info->numberOfPaths );
       info->numberOfInfoEntries = ntohl( info->numberOfInfoEntries );
       for ( unsigned int i=0; i<info->numberOfInfoEntries; ++i ) {
-	info->entries[i].unknown0 = ntohl( info->entries[i].unknown0 );
-	info->entries[i].unknown1 = ntohl( info->entries[i].unknown1 );
-	info->entries[i].unknown2 = ntohl( info->entries[i].unknown2 );
-	info->entries[i].unknown3 = ntohl( info->entries[i].unknown3 );
+        info->entries[i].unknown0 = ntohl( info->entries[i].unknown0 );
+        info->entries[i].unknown1 = ntohl( info->entries[i].unknown1 );
+        info->entries[i].unknown2 = ntohl( info->entries[i].unknown2 );
+        info->entries[i].unknown3 = ntohl( info->entries[i].unknown3 );
       }
       cout << "info->version = " << info->version << endl;
       cout << "info->numberOfPaths = " << info->numberOfPaths << endl;
@@ -244,7 +245,7 @@ int main ( int argc, char * argv[] ) {
       vindex->unknown0 = ntohl( vindex->unknown0 );
       vindex->indexToVTree = ntohl( vindex->indexToVTree );
       vindex->unknown2 = ntohl( vindex->unknown2 );
-      vindex->unknown3 = vindex->unknown3;
+      // vindex->unknown3 is a byte so conversion not needed
       cout << "vindex->unknown0 = " << vindex->unknown0 << endl;
       cout << "vindex->indexToVTree = " << vindex->indexToVTree << endl;
       cout << "vindex->unknown2 = " << vindex->unknown2 << endl;
@@ -257,16 +258,15 @@ int main ( int argc, char * argv[] ) {
       unsigned int i;
       uint32_t * raw = (uint32_t*)&buffer[ptr.address];
       for ( i=0; i<ptr.length/sizeof(uint32_t); ++i ) {
-	cout << "0x" << setbase(16) << setw(8) << setfill('0') << ntohl(raw[i]) << setbase(10) << endl;
+        cout << "0x" << setbase(16) << setw(8) << setfill('0') << ntohl(raw[i]) << setbase(10) << endl;
       }
       i*=sizeof(uint32_t);
       for ( ; i<ptr.length; ++i ) {
-	cout << "0x" << setbase(16) << setw(2) << setfill('0') << (int)buffer[ptr.address+i] << endl;
+        cout << "0x" << setbase(16) << setw(2) << setfill('0') << (int)buffer[ptr.address+i] << endl;
       }
     }
   }
 
   delete [] buffer;
   return 0;
-
 }

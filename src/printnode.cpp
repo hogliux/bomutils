@@ -7,12 +7,12 @@
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
@@ -72,15 +72,15 @@ void print_node( ostream & output, const string & base, const string & system_pa
     struct dirent * dir;
     while ( ( dir = readdir( d ) ) != NULL ) {
       if ( dir->d_name[0] != '.' ) {
-	string new_path(path);
-	new_path += string( "/" ) + string( dir->d_name );
+        string new_path(path);
+        new_path += string( "/" ) + string( dir->d_name );
 #if defined(WINDOWS)
-	string new_system_path(system_path);
-	new_system_path += string( "\\" ) + string( dir->d_name );
+        string new_system_path(system_path);
+        new_system_path += string( "\\" ) + string( dir->d_name );
 #else
-	string new_system_path( new_path );
+        string new_system_path( new_path );
 #endif
-	print_node( output, base, new_system_path, new_path );
+        print_node( output, base, new_system_path, new_path );
       }
     }
     closedir( d );

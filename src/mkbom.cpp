@@ -7,12 +7,12 @@
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2, or (at your option)
   any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA  02110-1301 USA.
@@ -63,8 +63,8 @@ struct Node {
   uint32_t checksum;
   uint32_t linkNameLength;
   string linkName;
-  Node()
-  : type( kNullNode ) {
+
+  Node() : type( kNullNode ), mode(0), uid(0), gid(0), size(0), checksum(0), linkNameLength(0) {
   }
 };
 
@@ -87,6 +87,7 @@ private:
 
   uint32_t entry_size;
   char * entries;
+
 public:
   BOMStorage() {
     size_of_header = 512;
@@ -127,7 +128,6 @@ public:
       free_list->freelistPointers[i].address = htonl(0);
       free_list->freelistPointers[i].length = htonl(0);
     }
-
   }
 
   int addBlock( const void * data, uint32_t length ) {
@@ -137,7 +137,7 @@ public:
       entries = (char*)realloc( entries, length + entry_size );
     }
     memcpy( &entries[entry_size], data, length );
-    
+
     size_of_block_table = sizeof(uint32_t) + ( ( num_block_entries + 1 ) * sizeof(BOMPointer) );
     block_table = (BOMBlockTable *)realloc( block_table, size_of_block_table );
     block_table->blockPointers[num_block_entries].address = entry_size; /* this will be converted to the right value later on */
@@ -162,6 +162,7 @@ public:
     var->length = strlen(name);
     memcpy( var->name, name, strlen(name) );
     vars->count = htonl( ntohl( vars->count ) + 1 );
+
     /* update header */
     header->indexOffset = htonl( size_of_header + size_of_vars + entry_size );
     header->varsLength = htonl( size_of_vars );
@@ -177,7 +178,7 @@ public:
     memcpy( temp, block_table, size_of_block_table );
     for ( unsigned int i=0; i<ntohl(temp->numberOfBlockTablePointers); ++i ) {
       if ( temp->blockPointers[i].length != 0 ) {
-	temp->blockPointers[i].address = htonl( temp->blockPointers[i].address + size_of_header + size_of_vars );
+    temp->blockPointers[i].address = htonl( temp->blockPointers[i].address + size_of_header + size_of_vars );
       }
     }
     bom_file.write( (char*)temp, size_of_block_table );
@@ -221,22 +222,22 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
       string name;
       vector<string> elements;
       {
-	stringstream ss( line );
-	getline( ss, name, '\t' );
-	if ( ss.good() == false ) {
-	  cerr << endl << "Syntax error in lsbom input" << endl;
-	  exit(1);
-	}
-	{
-	  string rest;
-	  getline( ss, rest );
-    std::size_t it = rest.find("/");
-    if (it != string::npos) {
-	    rest[it] = ' ';
-	  }
-	  stringstream item_stream( rest );
-	  copy( istream_iterator<string>( item_stream ), istream_iterator<string>(), back_inserter( elements ) );
-	}
+        stringstream ss( line );
+        getline( ss, name, '\t' );
+        if ( ss.good() == false ) {
+          cerr << endl << "Syntax error in lsbom input" << endl;
+          exit(1);
+        }
+        {
+          string rest;
+          getline( ss, rest );
+          std::size_t it = rest.find("/");
+          if (it != string::npos) {
+            rest[it] = ' ';
+          }
+          stringstream item_stream( rest );
+          copy( istream_iterator<string>( item_stream ), istream_iterator<string>(), back_inserter( elements ) );
+        }
       }
       n.mode = dec_octal_to_int( atol( elements[0].c_str() ) );
       n.uid = atol( elements[1].c_str() );
@@ -266,32 +267,32 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     for ( map<string,Node>::const_iterator it=all_nodes.begin(); it != all_nodes.end(); ++it ) {
       vector<string> path_elements;
       {
-	stringstream ss(it->first);
-	for ( string element; getline( ss, element, '/' ); path_elements.push_back( element ) );
+        stringstream ss(it->first);
+        for ( string element; getline( ss, element, '/' ); path_elements.push_back( element ) ) {
+        }
       }
       Node * parent = &root;
       std::string full_path;
       for ( vector<string>::const_iterator jt = path_elements.begin(); jt != path_elements.end(); ++jt ) {
-	full_path += *jt;
-	/* search for this path element */
-	map<string,Node>::iterator kt;
-	if ( ( kt = parent->children.find( *jt ) ) == parent->children.end() ) {
-	  /* this node was not found in the parent, we must create it */
-	  map<string,Node>::const_iterator lt;
-	  if ( ( lt = all_nodes.find( full_path ) ) == all_nodes.end() ) {
-	    cerr << endl << "Parent directory of file/folder \"" << full_path << "\" does not appear in list" << endl;
-	    exit(1);
-	  }
-	  parent->children[*jt] = lt->second;
-	  kt = parent->children.find( *jt );
-	}	  
-	parent = &kt->second;
-	full_path += "/";
+        full_path += *jt;
+        /* search for this path element */
+        map<string,Node>::iterator kt;
+        if ( ( kt = parent->children.find( *jt ) ) == parent->children.end() ) {
+          /* this node was not found in the parent, we must create it */
+          map<string,Node>::const_iterator lt;
+          if ( ( lt = all_nodes.find( full_path ) ) == all_nodes.end() ) {
+            cerr << endl << "Parent directory of file/folder \"" << full_path << "\" does not appear in list" << endl;
+            exit(1);
+          }
+          parent->children[*jt] = lt->second;
+          kt = parent->children.find( *jt );
+        }
+        parent = &kt->second;
+        full_path += "/";
       }
     }
     num = all_nodes.size();
   }
-
 
   BOMStorage bom;
   {
@@ -325,7 +326,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     paths->backward = 0;
 
     vector<std::pair<uint32_t,const Node*> > stack;
-    
+
     stack.push_back( std::pair<uint32_t,const Node*>( 0, &root ) );
     unsigned int j = 0;
     while ( stack.size() != 0 ) {
@@ -335,7 +336,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
       for ( map<string,Node>::const_iterator it=arg.children.begin(); it != arg.children.end(); ++it ) {
         const Node & node = it->second;
         string s = it->first;
-        
+
         unsigned int bom_path_info2_size = sizeof(BOMPathInfo2) + node.linkNameLength;
         BOMPathInfo2 * info2 = (BOMPathInfo2*) malloc(bom_path_info2_size);
         if (node.type == kDirectoryNode) {
@@ -356,22 +357,22 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         info2->checksum = htonl(node.checksum);
         info2->linkNameLength = htonl(node.linkNameLength);
         strcpy( info2->linkName, node.linkName.c_str() );
-	
+
         BOMPathInfo1 info1;
         info1.id = htonl( j + 1 );
         info1.index = htonl(bom.addBlock(info2, bom_path_info2_size));
         paths->indices[j].index0 = htonl( bom.addBlock( &info1, sizeof(BOMPathInfo1) ) );
-        
+
         free((void*) info2);
-	
+
         unsigned int bom_file_size = sizeof(uint32_t) + 1 + s.size();
         BOMFile * f = (BOMFile*)malloc( bom_file_size );
         f->parent = htonl( parent );
         strcpy( f->name, s.c_str() );
         paths->indices[j].index1 = htonl( bom.addBlock( f, bom_file_size ) );
         free( (void*) f );
-	
-        stack.push_back( std::pair<uint32_t, const Node*>( j + 1, &node ) );      
+
+        stack.push_back( std::pair<uint32_t, const Node*>( j + 1, &node ) );
         j++;
       }
     }
@@ -394,7 +395,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     tree.blockSize = htonl(4096);
     tree.pathCount = htonl(0);
     tree.unknown3 = 0;
-    
+
     tree.child = htonl( bom.addBlock( empty_path, path_size ) );
     bom.addVar( "HLIndex", &tree, sizeof(BOMTree) );
 
@@ -410,10 +411,10 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     tree.blockSize = htonl(4096);
     tree.child = htonl( bom.addBlock( empty_path, path_size ) );
     bom.addVar( "Size64", &tree, sizeof(BOMTree) );
-   
+
     free( (void*)empty_path );
   }
-  
+
   ofstream o_file( output_path.c_str(), ios::binary | ios::out );
   if ( o_file.fail() ) {
     cerr << endl << "Unable to open output file: " << output_path << endl;

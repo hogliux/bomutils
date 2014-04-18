@@ -1,1 +1,5 @@
 build/
+.project
+.cproject
+.settings/
+
