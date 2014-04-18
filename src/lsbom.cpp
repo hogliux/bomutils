@@ -217,12 +217,21 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = optind; i < argc; i++) {
-    fstream f(argv[i], ios::in | ios::binary);
-
+    ifstream f(argv[i], ios::in | ios::binary);
+    
+    if (!f.is_open()) {
+      cerr << "Unable to open file: \"" << argv[i] << "\"" << endl;
+      return 1;
+    }
     // Get file length
     f.seekg(0, ios::end);
     streampos length = f.tellg();
     f.seekg(0);
+    // on unix we need an extra check as fstreams will happily open directories
+    if ((int)length == -1) {
+      cerr << "Unable to open file: \"" << argv[i] << "\"" << endl;
+      return 1;
+    }
 
     // Allocate space
     data = new char[length];
