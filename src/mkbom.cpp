@@ -30,6 +30,7 @@
 #include <iterator>
 #include <algorithm>
 #include <iomanip>
+#include <cmath>
 #include <stdlib.h>
 #include <libgen.h>
 #include <stdint.h>
@@ -130,6 +131,10 @@ public:
     }
   }
 
+  void * getBlock( uint32_t id ) {
+    return &entries[block_table->blockPointers[id].address];
+  }
+
   int addBlock( const void * data, uint32_t length ) {
     if ( entries == NULL ) {
       entries = (char*)malloc( length );
@@ -137,7 +142,6 @@ public:
       entries = (char*)realloc( entries, length + entry_size );
     }
     memcpy( &entries[entry_size], data, length );
-
     size_of_block_table = sizeof(uint32_t) + ( ( num_block_entries + 1 ) * sizeof(BOMPointer) );
     block_table = (BOMBlockTable *)realloc( block_table, size_of_block_table );
     block_table->blockPointers[num_block_entries].address = entry_size; /* this will be converted to the right value later on */
@@ -318,17 +322,26 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
     tree.pathCount = htonl( num );
     tree.unknown3 = 0; /* ?? */
 
-    unsigned int path_size = ( sizeof( uint16_t ) * 2 ) + ( sizeof( uint32_t ) * 2 ) + ( num * sizeof( BOMPathIndices ) );
-    BOMPaths * paths = (BOMPaths*)malloc( path_size );
-    paths->isLeaf = htons(1);
-    paths->count = htons(num);
-    paths->forward = 0;
-    paths->backward = 0;
+    unsigned int num_paths = ceil(static_cast<double>(num)/256.);
+      /* split the paths into several paths */
+    unsigned int path_size = ( sizeof( uint16_t ) * 2 ) + ( sizeof( uint32_t ) * 2 ) + 
+      ( num_paths * sizeof( BOMPathIndices ) );
+    BOMPaths * root_paths = (BOMPaths*)malloc( path_size );
+    root_paths->isLeaf = htons(0);
+    root_paths->count = htons(num_paths);
+    root_paths->forward = 0;
+    root_paths->backward = 0;
 
     vector<std::pair<uint32_t,const Node*> > stack;
 
     stack.push_back( std::pair<uint32_t,const Node*>( 0, &root ) );
     unsigned int j = 0;
+    unsigned int k = 0;
+    unsigned int current_path = 0;
+    unsigned int current_path_size = 0;
+    unsigned int last_file_info = 0;
+    unsigned int last_paths_id = 0;
+    BOMPaths * paths = NULL;
     while ( stack.size() != 0 ) {
       const Node & arg = *stack[0].second;
       uint32_t parent = stack[0].first;
@@ -336,6 +349,30 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
       for ( map<string,Node>::const_iterator it=arg.children.begin(); it != arg.children.end(); ++it ) {
         const Node & node = it->second;
         string s = it->first;
+
+	if ( k == 0 ) {
+	  unsigned int new_paths_id = 0;
+	  if ( paths != NULL ) {
+	    new_paths_id = bom.addBlock( paths, current_path_size );
+	    root_paths->indices[current_path].index0 = htonl(new_paths_id);
+	    if ( last_paths_id != 0 ) {
+	      BOMPaths * prev_paths = (BOMPaths*)bom.getBlock(last_paths_id);
+	      prev_paths->forward = htonl(new_paths_id);
+	    }
+	    root_paths->indices[current_path].index1 = last_file_info;
+	    paths = NULL;
+	    current_path++;
+	  }
+	  unsigned int next_num = 256 < (num-j) ? 256 : (num-j);
+	  current_path_size = ( sizeof( uint16_t ) * 2 ) + ( sizeof( uint32_t ) * 2 ) + 
+	    ( next_num * sizeof( BOMPathIndices ) );
+	  paths = (BOMPaths*)malloc(current_path_size);
+	  paths->isLeaf = htons(1);
+	  paths->count = htons(next_num);
+	  paths->forward = 0;
+	  paths->backward = htonl(new_paths_id);
+	  last_paths_id = new_paths_id;
+	}
 
         unsigned int bom_path_info2_size = sizeof(BOMPathInfo2) + node.linkNameLength;
         BOMPathInfo2 * info2 = (BOMPathInfo2*) malloc(bom_path_info2_size);
@@ -361,7 +398,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         BOMPathInfo1 info1;
         info1.id = htonl( j + 1 );
         info1.index = htonl(bom.addBlock(info2, bom_path_info2_size));
-        paths->indices[j].index0 = htonl( bom.addBlock( &info1, sizeof(BOMPathInfo1) ) );
+        paths->indices[k].index0 = htonl( bom.addBlock( &info1, sizeof(BOMPathInfo1) ) );
 
         free((void*) info2);
 
@@ -369,15 +406,25 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         BOMFile * f = (BOMFile*)malloc( bom_file_size );
         f->parent = htonl( parent );
         strcpy( f->name, s.c_str() );
-        paths->indices[j].index1 = htonl( bom.addBlock( f, bom_file_size ) );
+        paths->indices[k].index1 = last_file_info = htonl( bom.addBlock( f, bom_file_size ) );
         free( (void*) f );
 
         stack.push_back( std::pair<uint32_t, const Node*>( j + 1, &node ) );
         j++;
+	k = (k+1)%256;
       }
     }
-    tree.child = htonl( bom.addBlock( paths, path_size ) );
-    free( ( void*) paths );
+    if ( num_paths > 1 ) {
+      root_paths->indices[current_path].index0 = 
+	((BOMPaths*)bom.getBlock(last_paths_id))->forward = 
+	htonl( bom.addBlock( paths, current_path_size ) );
+      root_paths->indices[current_path].index1 = last_file_info;
+      tree.child = htonl( bom.addBlock( root_paths, path_size ) );
+    } else {
+      tree.child = htonl( bom.addBlock( paths, current_path_size ) );
+    }
+    free((void*)paths);
+    free((void*)root_paths);
     bom.addVar( "Paths", &tree, sizeof( BOMTree ) );
   }
 
