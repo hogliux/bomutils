@@ -61,18 +61,13 @@
     <pre>
       <font color="#509050">~ $</font> ( cd scripts &amp;&amp; find . | cpio -o --format odc --owner 0:80 | gzip -c ) &gt; flat/base.pkg/Scripts
     </pre>
-    <p>The last file needed in the base package is the <em>Bom</em> file. For this you will need to install the <a href="http://hogliux.github.io/bomutils">bomutils</a>. First, create a bom-compatible file listing of the payload:</p>
+    <p>The last file needed in the base package is the <em>Bom</em> file. For this you will need to install the <a href="http://hogliux.github.io/bomutils">bomutils</a>. Create the <em>Bom</em> with the following command:</p>
     <pre>
-      <font color="#509050">~ $</font> ls4mkbom root > filelist.txt
+      <font color="#509050">~ $</font> mkbom -u 0 -g 80 root flat/base.pkg/Bom
     </pre>
-<p>If you look at the contents of <em>filelist.txt</em> you will notice that the user and group ids are not correct. For example, on my linux installation, my user and group id is 1000/1002 - <em>this will be different on your system</em>. However, as mentioned above, on Mac OS X the user and group id must be 0/80. We can conveniently replace the gorup/user ids with <em>sed</em>:</p>
-    <pre>
-      <font color="#509050">~ $</font> cat filelist.txt | sed 's/1000\/1002/0\/80/g' > filelist_osx_permission.txt
-    </pre>
-<p>Now we are ready to create the <em>Bom</em> file:</p>
-    <pre>
-      <font color="#509050">~ $</font> mkbom -i filelist_osx_permission.txt flat/base.pkg/Bom
-    </pre>
+    <p>In the above command, note that we are once again overriding the user and group identifiers. As mentioned above,
+      on Mac OS X the user and group id must be 0/80. The <em>-u</em> and <em>-g</em> options allow us to conveniently
+      set these values.</p>
     <p>Great! We are done with the base.pkg, however there are still a few more files left in the flat package directory - all are very straight-forward.</p>
 <p> First, create the <em>Distribution</em> file. Place the following contents into the <em>flat</em> folder:</p>
     <pre>
