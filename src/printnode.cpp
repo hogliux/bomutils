@@ -38,7 +38,8 @@
 using namespace std;
 
 /* on unix system_path = path; on windows system_path is the windows native path format of path */
-void print_node( ostream & output, const string & base, const string & system_path, const string & path ) {
+void print_node( ostream & output, const string & base, const string & system_path, const string & path,
+        uint32_t uid, uint32_t gid) {
   struct stat s;
   string fullpath( base );
 #if defined(WINDOWS)
@@ -54,7 +55,8 @@ void print_node( ostream & output, const string & base, const string & system_pa
     cerr << "Unable to find path: " << fullpath << endl;
     exit(1);
   }
-  output << path << "\t" << setbase(8) << s.st_mode << "\t" << setbase(10) << s.st_uid << "/" << s.st_gid;
+  output << path << "\t" << setbase(8) << s.st_mode << "\t" << setbase(10);
+  output << (uid == UINT_MAX ? s.st_uid : uid) << "/" << (gid == UINT_MAX ? s.st_gid : gid);
   if ( S_ISREG(s.st_mode) ) {
     output << "\t" << s.st_size << "\t" << calc_crc32( fullpath.c_str() );
   }
@@ -80,14 +82,14 @@ void print_node( ostream & output, const string & base, const string & system_pa
 #else
         string new_system_path( new_path );
 #endif
-        print_node( output, base, new_system_path, new_path );
+        print_node( output, base, new_system_path, new_path, uid, gid );
       }
     }
     closedir( d );
   }
 }
 
-void print_node( ostream & output, string directory ) {
+void print_node( ostream & output, string directory, uint32_t uid, uint32_t gid ) {
   if ( directory.size() < 1 ) {
     cerr << "Invalid path" << endl;
     exit(1);
@@ -104,5 +106,5 @@ void print_node( ostream & output, string directory ) {
     cout << endl << "Argument must be a directory" << endl;
     exit(1);
   }
-  print_node( output, directory, "", "." );
+  print_node( output, directory, "", ".", uid, gid );
 }
