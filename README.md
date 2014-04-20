@@ -17,12 +17,7 @@ Usage
 To create a bom file from unix type OSes, follow the following steps.
 
 1. Put the installation payload into a directory. We assume the name of the directory is 'base'
-2. Execute 'ls4mkbom base > filelist.txt' to create a list of the contents of the base folder.
-3. Edit filelist.txt and modify the user and group ids to match the appropriate values on Mac OS X (typically the root(0)/wheel(80) user/group is used on Mac OS X). For example, an entry in filelist.txt may look like this:
-
-    ./Applications   40755	0/80
-
-4. Use mkbom to create the bom file by invoking 'mkbom -i filelist.txt Bom'
+2. Use mkbom to create the bom file by invoking 'mkbom -u 0 -g 80 base Bom'
 
 Documentation
 -------------

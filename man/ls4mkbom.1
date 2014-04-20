@@ -1,13 +1,24 @@
 .\" Manpage for ls4mkbom.
 .\" Contact bomutils@gmail.com
-.TH man 1 "28 July 2013" "1.0" "ls4mkbom man page"
+.TH man 1 "19 April 2014" "1.0" "ls4mkbom man page"
 .SH NAME
-ls4mkbom \- print the contents of a directory in the format expected by mkbom's '-i' option
+ls4mkbom \- print the contents of a directory in the format expected by the \fImkbom\fR \fB\-i\fR option
 .SH SYNOPSIS
-ls4mkbom source-directory
+ls4mkbom [-u uid] [-g gid] source\-directory
 .SH DESCRIPTION
 .PP
-ls4mkbom prints a list of file and folders contained in the directory specified by 'source-directory'. This file can then be used as an input for mkbom's '-i' option. This is useful, so that user/group ids can be modified to be appropriate for Mac OS X. See the tutorial at http://hogliux.github.io/bomutils/tutorial.html
+\fIls4mkbom\fR prints a list of file and folders contained in the directory specified by \fIsource-directory\fR. This
+file can then be used as an input for the mkbom \fB\-i\fR option. The \fB\-u\fR and \fB\-g\fR options can be used to
+modify the user and group identifiers to be appropriate for Mac OS X. See the tutorial at http://hogliux.github.io/bomutils/tutorial.html
+.TP
+\fB\-u\fR
+Each file or folder entry listed for a BOM contains the owner's user and group identifier (e.g. 500/501). Typically,
+these Linux values are meaningless on the Mac platform. Use the \fB\-u\fR option to force the user identifier to a
+specific value. Typically, this value should be 0 (i.e. root).
+.TP
+\fB\-g\fR
+Similar to the \fB\-u\fR option but forces the group identifier to a specific value. Typically this value should be
+80 (i.e. admin).
 .SH SEE ALSO
 mkbom(1), lsbom(1), dumpbom(1)
 .SH BUGS

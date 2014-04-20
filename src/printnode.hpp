@@ -24,5 +24,7 @@
 
 #include <iostream>
 #include <string>
+#include <climits>
+#include <stdint.h>
 
-void print_node( std::ostream & output, std::string directory );
+void print_node( std::ostream & output, std::string directory, uint32_t uid, uint32_t gid );

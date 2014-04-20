@@ -21,14 +21,52 @@
   Numerous further improvements by Baron Roberts.
 */
 #include <iostream>
+#include <climits>
+#include <unistd.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "printnode.hpp"
 
 using namespace std;
 
+void usage() {
+  cout << "Usage: ls4mkbom [-u uid] [-g gid] path" << endl << endl;
+  cout << "\t-u\tForce user ID to the specified value" << endl;
+  cout << "\t-g\tForce group ID to the specified value" << endl;
+}
+
 int main( int argc, char * argv[] ) {
-  if ( argc != 2 ) {
-    cerr << "Usage: ls4mkbom path" << endl;
+  uint32_t uid = UINT_MAX;
+  uint32_t gid = UINT_MAX;
+
+  while (true) {
+    char c = getopt(argc, argv, "hu:g:");
+    if (c == -1) {
+      break;
+    }
+
+    switch (c) {
+    case 'u':
+      uid = atol(optarg);
+      break;
+    case 'g':
+      gid = atol(optarg);
+      break;
+    case 'h':
+      usage();
+      return 0;
+    case ':':
+    case '?':
+      usage();
+      return 1;
+    }
   }
-  print_node( cout, argv[1] );
+
+  if (optind == argc) {
+    usage();
+    return 1;
+  }
+
+  print_node( cout, argv[optind], uid, gid );
   return 0;
 }
