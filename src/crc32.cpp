@@ -71,6 +71,10 @@ uint32_t calc_crc32( const char * file_path ) {
   }
 #else
   off_t file_length = lseek( f, 0, SEEK_END );
+  if (file_length < (off_t)0) {
+    cerr << "Cannot seek to end of file: " << file_path << endl;
+    exit(1);
+  }
   lseek( f, 0, SEEK_SET );
 #endif
 
