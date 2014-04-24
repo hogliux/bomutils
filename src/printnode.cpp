@@ -62,8 +62,12 @@ void print_node( ostream & output, const string & base, const string & system_pa
   }
 #if !defined(WINDOWS)
   if ( S_ISLNK( s.st_mode) ) {
-    char buffer[PATH_MAX];
+    char buffer[PATH_MAX + 1];
     ssize_t num_bytes = readlink(fullpath.c_str(), buffer, PATH_MAX);
+    if ( num_bytes < 0 ) {
+      cerr << "Unable to read symbolic link: " << fullpath.c_str() << endl;
+      exit(1);
+    }
     buffer[num_bytes] = '\0';
     output << "\t" << s.st_size << "\t" << calc_str_crc32(buffer) << "\t" << buffer;
   }
