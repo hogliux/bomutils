@@ -1,0 +1,80 @@
+.\" Manpage for lsbom.
+.\" Contact bomutils@gmail.com
+.TH man 1 "19 April 2014" "1.0" "lsbom man page"
+.SH NAME
+lsbom \- list the contents of a bill-of-materials file
+.SH SYNOPSIS
+lsbom [-bcdflmsx] [-p parameters] bom\-file
+.SH DESCRIPTION
+.PP
+\fIlsbom\fR lists the contents of the bill-of-materials file \fIbom-file\fR created by \fImkbom\fR.
+.TP
+\fB\-b\fR
+list block devices
+.TP
+\fB\-c\fR
+list character devices
+.TP
+\fB\-d\fR
+list directories
+.TP
+\fB\-d\fR
+list files
+.TP
+\fB\-d\fR
+list symbolic links
+.TP
+\fB\-m\fR
+print modified times
+.TP
+\fB\-s\fR
+print pathnames only
+.TP
+\fB\-x\fR
+suppress modes for directories and symlinks
+.TP
+\fB\-p fFmMgutTsSc/lL012\fR
+depending on the characters that follow print only some of the information
+.RS
+.TP
+\fBf\fR \- file name
+.TP
+\fBF\fR \- file name with quotes (for example "/bin/bash")
+.TP
+\fBm\fR \- file mode (permissions)
+.TP
+\fBM\fR \- symbolic file mode
+.TP
+\fBg\fR \- group id
+.TP
+\fBu\fR \- user id
+.TP
+\fBt\fR \- modification time
+.TP
+\fBT\fR \- formatted modification time
+.TP
+\fBs\fR \- file size
+.TP
+\fBS\fR \- formatted file size
+.TP
+\fBc\fR \- 32-bit checksum
+.TP
+\fB/\fR \- user-id/group-id
+.TP
+\fBl\fR \- link name
+.TP
+\fBL\fR \- quoted link name
+.TP
+\fB0\fR \- device type
+.TP
+\fB1\fR \- device major
+.TP
+\fB2\fR \- device minor
+.RE
+.SH SEE ALSO
+mkbom(1), ls4mkbom(1), dumpbom(1)
+.SH BUGS
+Some non essential options listed above may not work as expected and have received very little testing.
+.SH AUTHOR
+Fabian Renn (fabian.renn@gmail.com)
+http://hogliux.github.io/bomutils
