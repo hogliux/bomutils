@@ -38,6 +38,7 @@
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>
+#include <unistd.h>
 #endif
 #include <cstring>
 
