@@ -42,11 +42,12 @@ COMMON_OBJECTS=$(addprefix $(BUILD_OBJ_DIR)/,$(COMMON_SOURCES:.cpp=.o))
 APP_NAMES=$(addsuffix $(SUFFIX),$(APP_SOURCES:.cpp=))
 APPS=$(addprefix $(BUILD_BIN_DIR)/,$(APP_NAMES))
 MAN=$(addprefix $(BUILD_MAN_DIR)/,$(APP_SOURCES:.cpp=.1.gz))
+GIT_VERSION=$(shell if ( git tag 2>&1 ) > /dev/null; then git tag; else echo unknown; fi)
 
 vpath %.cpp src
 vpath %.1 man
 
-.PHONY: $(APP_NAMES) all install clean
+.PHONY: $(APP_NAMES) all install clean dist
 .PRECIOUS: $(BUILD_OBJ_DIR)/%.o $(BUILD_OBJ_DIR)/%.d
 
 all : $(APPS) $(MAN)
@@ -78,6 +79,9 @@ $(APP_NAMES) :
 	$(MAKE) $(BUILD_BIN_DIR)/$@
 
 -include $(DEPS)
+
+dist : clean
+	cd .. && tar cvzf bomutils_$(GIT_VERSION).tar.gz --exclude .git bomutils-$(GIT_VERSION)
 
 clean :
 	rm -rf $(BUILD_DIR)
