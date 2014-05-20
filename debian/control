@@ -1,0 +1,19 @@
+Source: bomutils
+Section: devel
+Priority: extra
+Maintainer: Fabian Renn <fabian.renn@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: http://hogliux.github.io/bomutils/index.html
+Vcs-Git: https://github.com/hogliux/bomutils.git
+Vcs-Browser: https://github.com/hogliux/bomutils
+
+Package: bomutils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Open source tools to create bill-of-materials files used in Mac OS X installers
+ bomutils are a set of tools to create Mac OS X installer packages on foreign
+ OSes (windows, linux, etc.). These tools can be used as part of the
+ cross-compilation process. In particular, it includes an open source version
+ of the mkbom tool which is distributed as a closed-source version on Mac OS X
+ Developer Tools.

@@ -1,0 +1,11 @@
+bomutils (0.2-1) saucy; urgency=low
+
+  * Rebuild from new upstream release
+
+ -- Fabian Renn <fabian.renn@gmail.com>  Tue, 20 May 2014 17:25:46 +0100
+
+bomutils (0.1-1) saucy; urgency=low
+
+  * Initial release
+
+ -- Fabian Renn <fabian.renn@gmail.com>  Wed, 15 Jan 2014 15:29:09 +0000
