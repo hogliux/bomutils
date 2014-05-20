@@ -42,7 +42,8 @@ COMMON_OBJECTS=$(addprefix $(BUILD_OBJ_DIR)/,$(COMMON_SOURCES:.cpp=.o))
 APP_NAMES=$(addsuffix $(SUFFIX),$(APP_SOURCES:.cpp=))
 APPS=$(addprefix $(BUILD_BIN_DIR)/,$(APP_NAMES))
 MAN=$(addprefix $(BUILD_MAN_DIR)/,$(APP_SOURCES:.cpp=.1.gz))
-GIT_VERSION=$(shell if ( git tag 2>&1 ) > /dev/null; then git tag; else echo unknown; fi)
+GIT_VERSION=$(shell if ( git tag 2>&1 ) > /dev/null; then git tag | tail -n 1; else echo unknown; fi)
+ROOT_DIRECTORY_NAME=$(shell basename $${PWD})
 
 vpath %.cpp src
 vpath %.1 man
@@ -81,7 +82,7 @@ $(APP_NAMES) :
 -include $(DEPS)
 
 dist : clean
-	cd .. && tar cvzf bomutils_$(GIT_VERSION).tar.gz --exclude .git bomutils-$(GIT_VERSION)
+	cd .. && tar cvzf bomutils_$(GIT_VERSION).tar.gz --exclude .git $(ROOT_DIRECTORY_NAME)
 
 clean :
 	rm -rf $(BUILD_DIR)
