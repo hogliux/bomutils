@@ -47,9 +47,9 @@
     <p>There are many important things you must watch out for in this file. First of all, notice how the PackageInfo file lists all bundles that are in your pay load. The version and bundle-ids must match the <em>Info.plist</em> in your application bundle exactly, otherwise the installer will fail. Also, the PackageInfo contains the number of files and the installation size in kb. Both can be obtained by executing the following in the build folder:
     <pre>
       <font color="#509050">~ $</font> find root | wc -l
-      <font color="#509050">~ $</font> du -b -s root
+      <font color="#509050">~ $</font> BLOCKSIZE=1k du -s root
     </pre>
-    <p>where the latter is the payload size in <em>bytes</em>.</p>
+    <p>where the latter is the payload size in <em>kilobytes</em>.</p>
     <p>If you do not wish to execute an installer script then you can omit the <em>&lt;scripts&gt;</em> section of the above PackageInfo file. However, ProFarms Ltd. has decided to deploy their installer with a postinstall script. To add this to the installer, we first create a script directory (<em>mkdir scripts</em>) in the build folder and then place a file named <em>postinstall</em> inside that folder with the following contents:</p>
     <pre>
       #!/bin/bash<br/><br/>
