@@ -61,12 +61,13 @@ struct Node {
   uint32_t mode;
   uint32_t uid;
   uint32_t gid;
+  uint32_t modtime;
   uint32_t size;
   uint32_t checksum;
   uint32_t linkNameLength;
   string linkName;
 
-  Node() : type( kNullNode ), mode(0), uid(0), gid(0), size(0), checksum(0), linkNameLength(0) {
+  Node() : type( kNullNode ), mode(0), uid(0), gid(0), modtime(0), size(0), checksum(0), linkNameLength(0) {
   }
 };
 
@@ -247,6 +248,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
       n.mode = dec_octal_to_int( atol( elements[0].c_str() ) );
       n.uid = atol( elements[1].c_str() );
       n.gid = atol( elements[2].c_str() );
+      n.modtime = atol(elements[3].c_str());
       n.size = 0;
       n.checksum = 0;
       n.linkNameLength = 0;
@@ -254,14 +256,14 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         n.type = kDirectoryNode;
       } else if ( ( n.mode & 0xF000 ) == 0x8000 ) {
         n.type = kFileNode;
-        n.size = atol(elements[3].c_str());
-        n.checksum = atol(elements[4].c_str());
+        n.size = atol(elements[4].c_str());
+        n.checksum = atol(elements[5].c_str());
       } else if ((n.mode & 0xF000) == 0xA000) {
         n.type = kSymbolicLinkNode;
-        n.size = atol(elements[3].c_str());
-        n.checksum = atol(elements[4].c_str());
-        n.linkNameLength = elements[5].size() + 1;
-        n.linkName = elements[5];
+        n.size = atol(elements[4].c_str());
+        n.checksum = atol(elements[5].c_str());
+        n.linkNameLength = elements[6].size() + 1;
+        n.linkName = elements[6];
       } else {
         cerr << endl << "Node type not supported" << endl;
         exit(1);
@@ -389,7 +391,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         info2->mode = htons(node.mode);
         info2->user = htonl(node.uid);
         info2->group = htonl(node.gid);
-        info2->modtime = 0;
+        info2->modtime = htonl(node.modtime);
         info2->size = htonl(node.size);
         info2->unknown1 = 1;
         info2->checksum = htonl(node.checksum);
