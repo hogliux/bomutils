@@ -36,6 +36,8 @@ BUILD_BIN_DIR=$(BUILD_DIR)/bin
 BUILD_OBJ_DIR=$(BUILD_DIR)/obj
 BUILD_MAN_DIR=$(BUILD_DIR)/man
 
+DOCKER_IMAGE_NAME=bomutils
+
 SOURCES=$(APP_SOURCES) $(COMMON_SOURCES)
 DEPS=$(addprefix $(BUILD_OBJ_DIR)/,$(SOURCES:.cpp=.d))
 COMMON_OBJECTS=$(addprefix $(BUILD_OBJ_DIR)/,$(COMMON_SOURCES:.cpp=.o))
@@ -87,3 +89,5 @@ dist : clean
 clean :
 	rm -rf $(BUILD_DIR)
 
+docker-image :
+	docker build -t bomutils .
