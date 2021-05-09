@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
 
       DEBUG(2, "BOMVar 0x" << hex << ntohl(var->index) << ' ' << name << ':');
 
-      if (name == "Paths") {
+      if (strstr(name.c_str(),"Paths") == 0) {
         BOMPaths *paths = (BOMPaths *)lookup(tree->child);
 
         typedef map<uint32_t, string> filenames_t;
