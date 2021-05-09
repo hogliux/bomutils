@@ -40,7 +40,7 @@ int main( int argc, char * argv[] ) {
   uint32_t gid = UINT_MAX;
 
   while (true) {
-    char c = getopt(argc, argv, "hu:g:");
+    signed char c = getopt(argc, argv, "hu:g:");
     if (c == -1) {
       break;
     }

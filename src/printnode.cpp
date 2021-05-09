@@ -57,6 +57,7 @@ void print_node( ostream & output, const string & base, const string & system_pa
   }
   output << path << "\t" << setbase(8) << s.st_mode << "\t" << setbase(10);
   output << (uid == UINT_MAX ? s.st_uid : uid) << "/" << (gid == UINT_MAX ? s.st_gid : gid);
+  output << "\t" << s.st_mtime;
   if ( S_ISREG(s.st_mode) ) {
     output << "\t" << s.st_size << "\t" << calc_crc32( fullpath.c_str() );
   }
