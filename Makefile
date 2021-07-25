@@ -23,7 +23,7 @@ CXX=g++
 PREFIX=/usr
 
 SUFFIX=
-CXXFLAGS=-g -O2 -ffile-prefix-map=/home/lbr/code/bomutils=. -fstack-protector-all -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 -Os -s
+CXXFLAGS=-g -O3 -ffile-prefix-map=/home/lbr/code/bomutils=. -fstack-protector-all -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2 -s
 LDFLAGS=-pie -Wl,-z,now,-z,relro
 LIBS=
 
