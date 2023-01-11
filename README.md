@@ -29,13 +29,4 @@ Joseph Coffland and Julian Devlin for initial contributions. Baron Roberts for n
 
 Contact
 -------
-Fabian Renn, fabian.renn@gmail.com
-http://hogliux.github.io/bomutils
-
-Donations
----------
-
-Creating and maintaining bomutils is time-consuming. If you find bomutils useful, then why not consider donating:
-
-Bitcoin: 1AUYAR1uzs8c3RnpEHM8kqQYN8eXaxdLKi
-PayPal: fabian.renn@gmail.com
+@hogliux
