@@ -1,5 +1,5 @@
-bomutils
-========
+bomutils - *This project is deprecated and should no longer be used*
+====================================================================
 
 *Open source tools to create bill-of-materials files used in Mac OS X installers*
 
