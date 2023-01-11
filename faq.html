@@ -15,7 +15,7 @@
  <body>
   <div>
     <p><a href="index.html">[Home]</a></p>
-   <h1>FAQ</h1>
+   <h1>FAQ - <i><font color="red">This project is archived/deprecated and should no longer be used</font></i></h1>
    <h2>1. What is &ldquo;bomutils&rdquo;?</h2>
    <p>bomutils are a set of tools to create Mac OS X installer packages on foreign OSes (windows, linux, etc.). These tools can be used as part of the cross-compilation process. In particular, &nbsp;it includes an open source version of the <span style="font-weight:bold">mkbom</span> tool which is distributed as closed-source version on Mac OS X Developer Tools. <span style="font-weight:bold">mkbom </span>is the missing component to create Mac OS X installer packages on foreign OSes. All other steps in generating Mac OS X installer packages are relatively straight forward (see the <a href="tutorial.html">tutorial</a>).</p>
    <p></p>
@@ -36,20 +36,13 @@
    <p></p>
    <h2>5. How do I compile Mac OS X applications on Linux/Windows/...?</h2>
    <p>This beyond the scope of this project. However, <a href="http://devs.openttd.org/~truebrain/compile-farm/apple-darwin9.2008-09-17.txt">this</a> is a good starting point or use llvm.</p>
-   <p dir="ltr" style="text-align:left">If you need more help you can hire me as a consultant and/or donate some money for me to create a ubuntu/fedora/debian/etc. package.</p>
    <p dir="ltr" style="text-align:left"></p>
-   <h2 dir="ltr">6. What is the license?</h2>
-   <p dir="ltr">bomutils is licensed under the GPLv2. If this is a problem for you please send me an <a href="mailto:bomutils@gmail.com">e-mail</a></p>
-   <p dir="ltr"></p>
    <h2 dir="ltr">7. My installer is not working?</h2>
    <p dir="ltr">This can be due to several reasons. The most common reason is that the file permissions and uid/gid&nbsp;in the bom file and in the installer archive don&#146;t match. It is recommended that you always use the &#145;-i&#146; option of mkbom to create bom file from a text file containing a file list. This way you can edit the uid/gid and permissions with sed or similar before creating the bom. Also you probably want to map uid and gid when creating the instaler archive by using the &#145;--owner&#146; option in cpio. </p>
    <p dir="ltr">Also, although it is important that you compress the Payload file, the flat package installer file itself should be compressed with the xar option &#145;--compression none&#146; otherwise your package will be corrupted.</p>
    <p dir="ltr">Please see the tutorial for more help.</p>
    <h2 dir="ltr">8. Who are the authors of bomutils?</h2>
    <p dir="ltr">Principle development work was done by Fabian Renn with contributions from Joseph Coffland and Julian Devlin.</p>
-   <h2 dir="ltr">9. Where can I donate money :-)?</h2>
-   <p dir="ltr">I spent many days writing the bomutils software and documentation. If you find this software useful then please consider <a href="index.html#donations">donating</a>.</p>
-   <p dir="ltr"></p>
 <p><a href="index.html">[Home]</a></p>
    <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
   </div>
