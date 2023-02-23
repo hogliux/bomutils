@@ -67,7 +67,7 @@ char *lookup(int i, uint32_t *length = 0) {
         << " addr=0x" << hex << setw(4) << setfill('0') << addr
         << " len=" << dec << ntohl(index->length));
 
-  return data + addr;
+  return bomdata + addr;
 }
 
 
