@@ -396,7 +396,7 @@ void write_bom( istream & lsbom_file, const string & output_path ) {
         info2->unknown1 = 1;
         info2->checksum = htonl(node.checksum);
         info2->linkNameLength = htonl(node.linkNameLength);
-        strcpy( info2->linkName, node.linkName.c_str() );
+        strncpy( info2->linkName, node.linkName.c_str(), node.linkNameLength );
 
         BOMPathInfo1 info1;
         info1.id = htonl( j + 1 );
