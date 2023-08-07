@@ -31,6 +31,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
+#include <cstring>
 
 #include "printnode.hpp"
 #include "crc32.hpp"
@@ -78,7 +79,10 @@ void print_node( ostream & output, const string & base, const string & system_pa
     DIR * d = opendir( fullpath.c_str() );
     struct dirent * dir;
     while ( ( dir = readdir( d ) ) != NULL ) {
-      if ( dir->d_name[0] != '.' ) {
+      if (
+        !(dir->d_name[0] == '.' && strlen(dir->d_name) == 1) &&                       // Is not itself "."
+        !(strlen(dir->d_name) == 2 && dir->d_name[0] == '.' && dir->d_name[1] == '.') // Is not parent directory ".." 
+      ) {
         string new_path(path);
         new_path += string( "/" ) + string( dir->d_name );
 #if defined(WINDOWS)
