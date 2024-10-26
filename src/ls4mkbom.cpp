@@ -30,17 +30,19 @@
 using namespace std;
 
 void usage() {
-  cout << "Usage: ls4mkbom [-u uid] [-g gid] path" << endl << endl;
+  cout << "Usage: ls4mkbom [-u uid] [-g gid] [-H] path" << endl << endl;
   cout << "\t-u\tForce user ID to the specified value" << endl;
   cout << "\t-g\tForce group ID to the specified value" << endl;
+  cout << "\t-H\tInclude hidden files" << endl;
 }
 
 int main( int argc, char * argv[] ) {
   uint32_t uid = UINT_MAX;
   uint32_t gid = UINT_MAX;
+  bool includeHidden = false;
 
   while (true) {
-    signed char c = getopt(argc, argv, "hu:g:");
+    signed char c = getopt(argc, argv, "hu:g:H");
     if (c == -1) {
       break;
     }
@@ -51,6 +53,9 @@ int main( int argc, char * argv[] ) {
       break;
     case 'g':
       gid = atol(optarg);
+      break;
+    case 'H':
+      includeHidden = true;
       break;
     case 'h':
       usage();
@@ -67,6 +72,6 @@ int main( int argc, char * argv[] ) {
     return 1;
   }
 
-  print_node( cout, argv[optind], uid, gid );
+  print_node( cout, argv[optind], uid, gid, includeHidden );
   return 0;
 }

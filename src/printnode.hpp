@@ -27,4 +27,4 @@
 #include <climits>
 #include <stdint.h>
 
-void print_node( std::ostream & output, std::string directory, uint32_t uid, uint32_t gid );
+void print_node( std::ostream & output, std::string directory, uint32_t uid, uint32_t gid, bool includeHidden );
