@@ -39,7 +39,7 @@ using namespace std;
 
 /* on unix system_path = path; on windows system_path is the windows native path format of path */
 void print_node( ostream & output, const string & base, const string & system_path, const string & path,
-        uint32_t uid, uint32_t gid) {
+        uint32_t uid, uint32_t gid, bool includeHidden) {
   struct stat s;
   string fullpath( base );
 #if defined(WINDOWS)
@@ -78,23 +78,28 @@ void print_node( ostream & output, const string & base, const string & system_pa
     DIR * d = opendir( fullpath.c_str() );
     struct dirent * dir;
     while ( ( dir = readdir( d ) ) != NULL ) {
-      if ( dir->d_name[0] != '.' ) {
+      string name = string( dir->d_name );
+      if (   !includeHidden
+           ? dir->d_name[0] != '.'
+	   : (name.compare(".") != 0 && name.compare("..") != 0)
+      ) {
+
         string new_path(path);
-        new_path += string( "/" ) + string( dir->d_name );
+        new_path += string( "/" ) + name;
 #if defined(WINDOWS)
         string new_system_path(system_path);
-        new_system_path += string( "\\" ) + string( dir->d_name );
+        new_system_path += string( "\\" ) + name;
 #else
         string new_system_path( new_path );
 #endif
-        print_node( output, base, new_system_path, new_path, uid, gid );
+        print_node( output, base, new_system_path, new_path, uid, gid, includeHidden );
       }
     }
     closedir( d );
   }
 }
 
-void print_node( ostream & output, string directory, uint32_t uid, uint32_t gid ) {
+void print_node( ostream & output, string directory, uint32_t uid, uint32_t gid, bool includeHidden ) {
   if ( directory.size() < 1 ) {
     cerr << "Invalid path" << endl;
     exit(1);
@@ -111,5 +116,5 @@ void print_node( ostream & output, string directory, uint32_t uid, uint32_t gid 
     cout << endl << "Argument must be a directory" << endl;
     exit(1);
   }
-  print_node( output, directory, "", ".", uid, gid );
+  print_node( output, directory, "", ".", uid, gid, includeHidden );
 }
